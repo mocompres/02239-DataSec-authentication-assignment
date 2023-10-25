@@ -4,18 +4,22 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.util.Scanner;
 
-import main.java.com.datasec.HelloService;
+//import com.datasec;
 
 public class Client {
     public static void main(String[] args) {
+		try {
         HelloService servce = (HelloService) Naming.lookup("rmi://localhost:5099/hello");
         System.out.println("---"+ servce.echo("hey server"));
+		} catch (Exception e) {
+
+		}
     }
 
 	
 	static Scanner input = new Scanner(System.in);
     
-    public boolean login(PrinterService service) throws RemoteException {
+    public boolean login(PrintServer service) throws RemoteException {
 		String auth = "";
 		
 		while (!auth.equals("Login succesful!")) {	

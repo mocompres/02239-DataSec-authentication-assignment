@@ -1,4 +1,4 @@
-package main.java.com.datasec;
+package com.datasec;
 
 import java.rmi.RemoteException;
 
