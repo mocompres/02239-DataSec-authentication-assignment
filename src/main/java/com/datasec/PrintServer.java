@@ -1,10 +1,16 @@
 package com.datasec;
 
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 
-public class PrintServer implements IPrintServer{
+public class PrintServer extends UnicastRemoteObject implements IPrintService{
+
+    public PrintServer() throws RemoteException {
+        super();
+    }
+
     public String print(String filename, String printer){
-        return null;
+        return "Test from Server";
     }
     public String queue(String printer){
         return null;

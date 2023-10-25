@@ -1,19 +1,17 @@
 package com.datasec;
 
+import java.net.MalformedURLException;
 import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Scanner;
 
 //import com.datasec;
 
 public class Client {
-    public static void main(String[] args) {
-		try {
-        HelloService servce = (HelloService) Naming.lookup("rmi://localhost:5099/hello");
-        System.out.println("---"+ servce.echo("hey server"));
-		} catch (Exception e) {
-
-		}
+    public static void main(String[] args) throws NotBoundException, MalformedURLException, RemoteException {
+        IPrintService service = (IPrintService) Naming.lookup("rmi://localhost:5099/print");
+        System.out.println("---"+ service.print("", "") + service.getClass().getName());
     }
 
 	
