@@ -2,6 +2,7 @@ package com.datasec;
 
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
+import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -20,6 +21,9 @@ import javax.crypto.NoSuchPaddingException;
 //import com.datasec;
 
 public class Client {
+    public static void main(String[] args) throws NotBoundException, MalformedURLException, RemoteException {
+        IPrintService service = (IPrintService) Naming.lookup("rmi://localhost:5099/print");
+        System.out.println("---"+ service.print("", "") + service.getClass().getName());
 
 	static IPrintService service; //new PrintService();
 	static String token;
@@ -63,8 +67,8 @@ public class Client {
 		Boolean verified = null;
 		serverPublicKey =  service.getPublicKey();
 		System.out.println("Enter your username");
-		String userName = input.nextLine();  
-		
+		String userName = input.nextLine();
+
 		System.out.println("Enter your password");
 		String password = input.nextLine();
 
@@ -76,7 +80,7 @@ public class Client {
 
 		user = tg.theUserBasedOnToken(token);
 		System.out.println("The username:" + user);
-		
+
 
 		verified = tg.isTokenValid(token);
 		System.out.println("Token verification status:" + verified);
