@@ -2,7 +2,7 @@ package com.datasec;
 
 import java.rmi.RemoteException;
 
-public interface IPrintServer {
+public interface IPrintService {
     String print(String filename, String printer);   // prints file filename on the specified printer
     String queue(String printer);   // lists the print queue for a given printer on the user's display in lines of the form <job number>   <file name>
     void topQueue(String printer, int job);   // moves job to the top of the queue

@@ -8,18 +8,20 @@ import java.util.Scanner;
 
 public class Client {
     public static void main(String[] args) {
-		try {
-        HelloService servce = (HelloService) Naming.lookup("rmi://localhost:5099/hello");
+		try {        
+			login();
+		HelloService servce = (HelloService) Naming.lookup("rmi://localhost:5099/hello");
         System.out.println("---"+ servce.echo("hey server"));
+
 		} catch (Exception e) {
 
 		}
     }
-
-	
-	static Scanner input = new Scanner(System.in);
     
-    public boolean login(PrintServer service) throws RemoteException {
+    public static boolean login() throws RemoteException {
+		Scanner input = new Scanner(System.in);
+
+		PrintService service = new PrintService();
 		String auth = "";
 		
 		while (!auth.equals("Login succesful!")) {	
