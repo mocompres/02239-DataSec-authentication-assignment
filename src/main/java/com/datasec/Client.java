@@ -11,7 +11,16 @@ import java.util.Scanner;
 public class Client {
     public static void main(String[] args) throws NotBoundException, MalformedURLException, RemoteException {
         IPrintService service = (IPrintService) Naming.lookup("rmi://localhost:5099/print");
-        System.out.println("---"+ service.print("", "") + service.getClass().getName());
+        //System.out.println("---"+ service.print("", ""));
+		service.print("TestFilename", "TestPrinter");
+		service.queue("TestPrinter");
+		service.topQueue("TestPrinter", 1);
+		service.start();
+		service.stop();
+		service.restart();
+		service.status("Testprinter");
+		service.readConfig("TestParameter");
+		service.setConfig("TestParameter", "TestValue");
     }
 
 	
