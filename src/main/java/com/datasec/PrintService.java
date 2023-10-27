@@ -49,7 +49,7 @@ public class PrintService implements IPrintService{
             while ((line = reader.readLine()) != null) {
                 
                 String[] loginStrings = line.split(", ");
-                System.out.println(Arrays.toString(loginStrings));
+                //System.out.println(Arrays.toString(loginStrings));
                 
                 if(loginStrings[0].equals(username)){
                     if(loginStrings[1].equals(password)){

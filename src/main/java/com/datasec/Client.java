@@ -10,11 +10,12 @@ public class Client {
     public static void main(String[] args) {
 		try {        
 			login();
-		HelloService servce = (HelloService) Naming.lookup("rmi://localhost:5099/hello");
-        System.out.println("---"+ servce.echo("hey server"));
+		//HelloService servce = (HelloService) Naming.lookup("rmi://localhost:5099/hello");
+        //System.out.println("---"+ servce.echo("hey server"));
 
 		} catch (Exception e) {
-
+			System.err.println(e);
+			System.out.println(e);
 		}
     }
     
@@ -24,17 +25,16 @@ public class Client {
 		PrintService service = new PrintService();
 		String auth = "";
 		
-		while (!auth.equals("Login succesful!")) {	
-		    System.out.println("Enter your username");
-			String userName = input.nextLine();  
-			
-		    System.out.println("Enter your password");
-			String password = input.nextLine();  
-			
-			auth = service.authenticateUser(userName, password);		
-			
-			System.out.println(auth);
-		}
+		System.out.println("Enter your username");
+		String userName = input.nextLine();  
+		
+		System.out.println("Enter your password");
+		String password = input.nextLine();  
+		
+		auth = service.authenticateUser(userName, password);		
+		
+		System.out.println(auth);
+		
 		input.close();
 		return true;
 	}
