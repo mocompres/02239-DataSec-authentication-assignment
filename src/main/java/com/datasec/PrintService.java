@@ -1,13 +1,10 @@
 package com.datasec;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.rmi.RemoteException;
 import java.util.Arrays;
-import java.util.Scanner;
 
 public class PrintService implements IPrintService{
     public String print(String filename, String printer){
@@ -38,6 +35,7 @@ public class PrintService implements IPrintService{
 
     public void setConfig(String parameter, String value){
     }
+    
     public String authenticateUser(String username, String password) throws RemoteException{
        
         BufferedReader reader = null;
@@ -46,6 +44,7 @@ public class PrintService implements IPrintService{
             reader = new BufferedReader(new FileReader("src/main/java/com/datasec/system.txt"));
 
             String line;
+            String token = null;
             // Reading lines from the file until the end is reached
             while ((line = reader.readLine()) != null) {
                 
@@ -54,16 +53,18 @@ public class PrintService implements IPrintService{
                 
                 if(loginStrings[0].equals(username)){
                     if(loginStrings[1].equals(password)){
-                        System.out.println("generate token");
-                        break;
+                        TokenGenerator tokenGenerator = new TokenGenerator();
+                        token = tokenGenerator.generateToken(username);
+                        return token;
                     }
                     else{
-                        System.out.println("Password was incorrect");
-                        break;
+                        return "Password was incorrect";
                     }
-                }else
-                    System.out.println("Couldn't find username");
+                }
+                if(line == null && token == null)
+                    return "Couldn't find the user";
             }
+            reader.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
