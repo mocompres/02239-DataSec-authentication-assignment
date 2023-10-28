@@ -4,6 +4,9 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.util.Scanner;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+
 //import com.datasec;
 
 public class Client {
@@ -23,7 +26,9 @@ public class Client {
 		Scanner input = new Scanner(System.in);
 
 		PrintService service = new PrintService();
+		TokenGenerator tg = new TokenGenerator();
 		String auth = "";
+		Jws<Claims> verified = null;
 		
 		System.out.println("Enter your username");
 		String userName = input.nextLine();  
@@ -34,6 +39,11 @@ public class Client {
 		auth = service.authenticateUser(userName, password);		
 		
 		System.out.println(auth);
+
+		System.out.println("Enter your token");
+		String token = input.nextLine();  
+		verified = tg.theUserBasedOnToken(token);
+		System.out.println(verified);
 		
 		input.close();
 		return true;

@@ -1,10 +1,16 @@
 package com.datasec;
 
+import java.security.Key;
 import java.util.Base64;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 import java.util.Date;
+
+import javax.crypto.spec.SecretKeySpec;
 
 public class TokenGenerator {
     private static final long EXPIRATION_TIME = 3600000; // 1 hour in milliseconds
@@ -22,5 +28,18 @@ public class TokenGenerator {
 
         return token;
     }
+
+    public static Jws<Claims> theUserBasedOnToken(String token) {
+    String secret = SECRET_KEY;
+    Key hmacKey = new SecretKeySpec(Base64.getDecoder().decode(secret), 
+                                    SignatureAlgorithm.HS256.getJcaName());
+
+    Jws<Claims> jwt = Jwts.parserBuilder()
+            .setSigningKey(hmacKey)
+            .build()
+            .parseClaimsJws(token);
+
+    return jwt;
+}
 }
 
