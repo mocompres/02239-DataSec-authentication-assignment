@@ -28,7 +28,8 @@ public class Client {
 		PrintService service = new PrintService();
 		TokenGenerator tg = new TokenGenerator();
 		String auth = "";
-		Jws<Claims> verified = null;
+		Jws<Claims> userInfo = null;
+		Boolean verified = null;
 		
 		System.out.println("Enter your username");
 		String userName = input.nextLine();  
@@ -42,9 +43,13 @@ public class Client {
 
 		System.out.println("Enter your token");
 		String token = input.nextLine();  
-		verified = tg.theUserBasedOnToken(token);
-		System.out.println(verified);
+		userInfo = tg.theUserBasedOnToken(token);
+		System.out.println(userInfo);
 		
+
+		verified = tg.isTokenValid(token);
+		System.out.println(verified);
+
 		input.close();
 		return true;
 	}

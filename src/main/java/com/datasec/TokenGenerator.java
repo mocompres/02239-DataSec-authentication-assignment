@@ -7,6 +7,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.SignatureException;
 
 import java.util.Date;
 
@@ -40,6 +41,21 @@ public class TokenGenerator {
             .parseClaimsJws(token);
 
     return jwt;
-}
-}
+    }
 
+    public static boolean isTokenValid(String token) {
+        String secret = SECRET_KEY;
+        Key hmacKey = new SecretKeySpec(Base64.getDecoder().decode(secret),
+                SignatureAlgorithm.HS256.getJcaName());
+
+        try {
+            Jws<Claims> jwt = Jwts.parserBuilder()
+                    .setSigningKey(hmacKey)
+                    .build()
+                    .parseClaimsJws(token);
+            return true; // Token is valid
+        } catch (SignatureException e) {
+            return false; // Token is not valid
+        }
+    }
+}
