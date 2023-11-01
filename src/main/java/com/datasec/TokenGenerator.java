@@ -30,7 +30,23 @@ public class TokenGenerator {
         return token;
     }
 
-    public static Jws<Claims> theUserBasedOnToken(String token) {
+    public static String theUserBasedOnToken(String token) {
+    String secret = SECRET_KEY;
+    Key hmacKey = new SecretKeySpec(Base64.getDecoder().decode(secret), 
+                                    SignatureAlgorithm.HS256.getJcaName());
+    try {
+        Jws<Claims> jwt = Jwts.parserBuilder()
+        .setSigningKey(hmacKey)
+        .build()
+        .parseClaimsJws(token);
+
+        return jwt.getBody().getSubject();
+        } catch (SignatureException e) {
+            return "Token is not valid";
+        }
+    }
+
+    public static Jws<Claims> infoBasedOnToken(String token) {
     String secret = SECRET_KEY;
     Key hmacKey = new SecretKeySpec(Base64.getDecoder().decode(secret), 
                                     SignatureAlgorithm.HS256.getJcaName());
