@@ -34,13 +34,17 @@ public class TokenGenerator {
     String secret = SECRET_KEY;
     Key hmacKey = new SecretKeySpec(Base64.getDecoder().decode(secret), 
                                     SignatureAlgorithm.HS256.getJcaName());
+    try {
+        Jws<Claims> jwt = Jwts.parserBuilder()
+        .setSigningKey(hmacKey)
+        .build()
+        .parseClaimsJws(token);
 
-    Jws<Claims> jwt = Jwts.parserBuilder()
-            .setSigningKey(hmacKey)
-            .build()
-            .parseClaimsJws(token);
-
-    return jwt;
+        return jwt;
+        } catch (SignatureException e) {
+            System.out.println("Token is not valid");
+            return null; // Token is not valid
+        }
     }
 
     public static boolean isTokenValid(String token) {
