@@ -52,9 +52,7 @@ public class PrintService extends UnicastRemoteObject implements IPrintService{
     }
     
     public String authenticateUser(String username, String password) throws RemoteException{
-        // Log
-        System.out.println("Authenticate User: " + username + ", " + password);
-
+        
         BufferedReader reader = null;
         try {
             // Creating a BufferedReader object to read from a file
@@ -70,11 +68,13 @@ public class PrintService extends UnicastRemoteObject implements IPrintService{
                 
                 if(loginStrings[0].equals(username)){
                     if(loginStrings[1].equals(password)){
+                        System.out.println("Authenticated user: " + username);
                         TokenGenerator tokenGenerator = new TokenGenerator();
                         token = tokenGenerator.generateToken(username);
                         return token;
                     }
                     else{
+                        System.out.println("The user" + username + " not authenticated");
                         return "Password was incorrect";
                     }
                 }
