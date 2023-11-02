@@ -14,6 +14,7 @@ import io.jsonwebtoken.Jws;
 public class Client {
 
 	static IPrintService service; //new PrintService();
+	static String token;
 
 	public static void main(String[] args) {
 		try {        
@@ -21,15 +22,15 @@ public class Client {
 			login();
 		//HelloService servce = (HelloService) Naming.lookup("rmi://localhost:5099/hello");
         //System.out.println("---"+ servce.echo("hey server"));
-			service.print("TestFilename", "TestPrinter");
-			service.queue("TestPrinter");
-			service.topQueue("TestPrinter", 1);
-			service.start();
-			service.stop();
-			service.restart();
-			service.status("Testprinter");
-			service.readConfig("TestParameter");
-			service.setConfig("TestParameter", "TestValue");
+			service.print(token,"TestFilename", "TestPrinter");
+			service.queue(token,"TestPrinter");
+			service.topQueue(token,"TestPrinter", 1);
+			service.start(token);
+			service.stop(token);
+			service.restart(token);
+			service.status(token,"Testprinter");
+			service.readConfig(token,"TestParameter");
+			service.setConfig(token, "TestParameter", "TestValue");
 
 		} catch (Exception e) {
 			System.err.println(e);
@@ -52,12 +53,11 @@ public class Client {
 		System.out.println("Enter your password");
 		String password = input.nextLine();  
 		
-		auth = service.authenticateUser(userName, password);		
-		
+		auth = service.authenticateUser(userName, password);
+
 		System.out.println(auth);
 
-		System.out.println("Enter your token");
-		String token = input.nextLine();  
+		token = auth;
 
 		user = tg.theUserBasedOnToken(token);
 		System.out.println("The username:" + user);
