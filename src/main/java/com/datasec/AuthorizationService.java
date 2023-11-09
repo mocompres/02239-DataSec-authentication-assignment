@@ -35,4 +35,16 @@ public class AuthorizationService {
             e.printStackTrace();
         }
     }
+
+    public boolean isOperationAllowed(String username, String operation){
+        int i;
+        if (userList.contains(username)) {
+            i = userList.indexOf(username);
+            if (policyList.get(i).contains(operation))
+                return true;
+            else
+                return false;
+        }else
+            return false;
+    }
 }
