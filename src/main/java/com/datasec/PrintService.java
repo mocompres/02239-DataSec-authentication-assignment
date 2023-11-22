@@ -15,10 +15,12 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Scanner;
 
 public class PrintService extends UnicastRemoteObject implements IPrintService{
 
     static KeyPair Keys;
+    private AuthorizationService authorizationService = new AuthorizationService();
     public PrintService() throws RemoteException, NoSuchAlgorithmException {
         super();
         KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
@@ -41,6 +43,8 @@ public class PrintService extends UnicastRemoteObject implements IPrintService{
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
         PublicKey pk = keyFactory.generatePublic(publicKeySpec);
+        if(!authorizationService.isOperationAllowed(user, "print"))
+            return Encryption.encrypt("Access denied", pk);
         System.out.println("<" + user + "> Print: parameters " + filename + ", " + printer);
         return Encryption.encrypt("Printing " + filename + " on printer " + printer, pk);
     }
@@ -54,36 +58,70 @@ public class PrintService extends UnicastRemoteObject implements IPrintService{
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
         PublicKey pk = keyFactory.generatePublic(publicKeySpec);
+        if(!authorizationService.isOperationAllowed(user, "queue"))
+            return Encryption.encrypt("Access denied", pk);
         System.out.println("<" + user + "> Queue: parameters " + printer);
         return Encryption.encrypt("Queue for print " + printer + ": 0", pk);
     }
-    public void topQueue(String token,String printer, int job) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public String topQueue(String token,String printer, int job) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, IOException, InvalidKeySpecException {
         token = Encryption.decrypt(token, Keys.getPrivate());
         printer = Encryption.decrypt(printer, Keys.getPrivate());
         TokenGenerator tokenGenerator = new TokenGenerator();
         String user = tokenGenerator.theUserBasedOnToken(token);
+        File publicKeyFile = new File(user+".key");
+        byte[] publicKeyBytes = Files.readAllBytes(publicKeyFile.toPath());
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+        PublicKey pk = keyFactory.generatePublic(publicKeySpec);
+        if(!authorizationService.isOperationAllowed(user, "topQueue"))
+            return Encryption.encrypt("Access denied", pk);
         System.out.println("<" + user + "> topQueue: parameters " + printer + ", " + job);
+        return Encryption.encrypt("Job set to top of queue", pk);
     }   
 
-    public void start(String token) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public String start(String token) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, InvalidKeySpecException, IOException {
         token = Encryption.decrypt(token, Keys.getPrivate());
         TokenGenerator tokenGenerator = new TokenGenerator();
         String user = tokenGenerator.theUserBasedOnToken(token);
+        File publicKeyFile = new File(user+".key");
+        byte[] publicKeyBytes = Files.readAllBytes(publicKeyFile.toPath());
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+        PublicKey pk = keyFactory.generatePublic(publicKeySpec);
+        if(!authorizationService.isOperationAllowed(user, "start"))
+            return Encryption.encrypt("Access denied", pk);
         System.out.println("<" + user + "> Start");
+        return Encryption.encrypt("Startet", pk);
     }
 
-    public void stop(String token) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public String stop(String token) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, IOException, InvalidKeySpecException {
         token = Encryption.decrypt(token, Keys.getPrivate());
         TokenGenerator tokenGenerator = new TokenGenerator();
         String user = tokenGenerator.theUserBasedOnToken(token);
+        File publicKeyFile = new File(user+".key");
+        byte[] publicKeyBytes = Files.readAllBytes(publicKeyFile.toPath());
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+        PublicKey pk = keyFactory.generatePublic(publicKeySpec);
+        if(!authorizationService.isOperationAllowed(user, "stop"))
+            return Encryption.encrypt("Access denied", pk);
         System.out.println("<" + user + "> Stop");
+        return Encryption.encrypt("Stopped", pk);
     }
 
-    public void restart(String token) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public String restart(String token) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, IOException, InvalidKeySpecException {
         token = Encryption.decrypt(token, Keys.getPrivate());
         TokenGenerator tokenGenerator = new TokenGenerator();
         String user = tokenGenerator.theUserBasedOnToken(token);
+        File publicKeyFile = new File(user+".key");
+        byte[] publicKeyBytes = Files.readAllBytes(publicKeyFile.toPath());
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+        PublicKey pk = keyFactory.generatePublic(publicKeySpec);
+        if(!authorizationService.isOperationAllowed(user, "restart"))
+            return Encryption.encrypt("Access denied", pk);
         System.out.println("<" + user + "> Restart");
+        return Encryption.encrypt("Restarted", pk);
     }
 
     public String status(String token,String printer) throws InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, IOException {
@@ -96,6 +134,8 @@ public class PrintService extends UnicastRemoteObject implements IPrintService{
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
         PublicKey pk = keyFactory.generatePublic(publicKeySpec);
+        if(!authorizationService.isOperationAllowed(user, "status"))
+            return Encryption.encrypt("Access denied", pk);
         System.out.println("<" + user + "> Status: parameters " + printer);
         return Encryption.encrypt("Status for printer " + printer,pk);
     }
@@ -110,15 +150,25 @@ public class PrintService extends UnicastRemoteObject implements IPrintService{
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
         PublicKey pk = keyFactory.generatePublic(publicKeySpec);
+        if(!authorizationService.isOperationAllowed(user, "readConfig"))
+            return Encryption.encrypt("Access denied", pk);
         System.out.println("<" + user + "> ReadConfig: parameters " + parameter);
         return Encryption.encrypt("Config for parameter " + parameter, pk);
     }
 
-    public void setConfig(String token,String parameter, String value) throws IOException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public String setConfig(String token,String parameter, String value) throws IOException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, InvalidKeySpecException {
         token = Encryption.decrypt(token, Keys.getPrivate());
         TokenGenerator tokenGenerator = new TokenGenerator();
         String user = tokenGenerator.theUserBasedOnToken(token);
+        File publicKeyFile = new File(user+".key");
+        byte[] publicKeyBytes = Files.readAllBytes(publicKeyFile.toPath());
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+        PublicKey pk = keyFactory.generatePublic(publicKeySpec);
+        if(!authorizationService.isOperationAllowed(user, "setConfig"))
+            return Encryption.encrypt("Access denied", pk);
         System.out.println("<" + user + "> SetConfig: parameters " + Encryption.decrypt(parameter, Keys.getPrivate()) + ", " + Encryption.decrypt(value, Keys.getPrivate()));
+        return Encryption.encrypt("Config set", pk);
     }
 
     private String hash(String pass, String salt) throws NoSuchAlgorithmException {
@@ -164,7 +214,7 @@ public class PrintService extends UnicastRemoteObject implements IPrintService{
                     }
                 }
                 if(line == null && token == null)
-                    return "Couldn't find the user";
+                    return Encryption.encrypt("Couldn't find the user", pk);
             }
             reader.close();
         } catch (IOException e) {
