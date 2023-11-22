@@ -5,19 +5,20 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.*;
 import java.nio.file.Files;
-import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.*;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Arrays;
-import java.util.Base64;
 
 public class PrintService extends UnicastRemoteObject implements IPrintService{
 
     static KeyPair Keys;
+    AuthorizationService service = new AuthorizationService();
+    TokenGenerator tg = new TokenGenerator();
+    String user;
+
     public PrintService() throws RemoteException, NoSuchAlgorithmException {
         super();
         KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
@@ -33,91 +34,129 @@ public class PrintService extends UnicastRemoteObject implements IPrintService{
         token = Encryption.decrypt(token, Keys.getPrivate());
         filename = Encryption.decrypt(filename, Keys.getPrivate());
         printer = Encryption.decrypt(printer, Keys.getPrivate());
-        TokenGenerator tokenGenerator = new TokenGenerator();
-        String user = tokenGenerator.theUserBasedOnToken(token);
-        File publicKeyFile = new File(user+".key");
-        byte[] publicKeyBytes = Files.readAllBytes(publicKeyFile.toPath());
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
-        PublicKey pk = keyFactory.generatePublic(publicKeySpec);
-        System.out.println("<" + user + "> Print: parameters " + filename + ", " + printer);
-        return Encryption.encrypt("Printing " + filename + " on printer " + printer, pk);
+        user = tg.theUserBasedOnToken(token);
+
+        if (service.isOperationAllowed(user, "print")) {
+            String user = tg.theUserBasedOnToken(token);
+            File publicKeyFile = new File(user+".key");
+            byte[] publicKeyBytes = Files.readAllBytes(publicKeyFile.toPath());
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+            PublicKey pk = keyFactory.generatePublic(publicKeySpec);
+            System.out.println("<" + user + "> Print: parameters " + filename + ", " + printer);
+            return Encryption.encrypt("Printing " + filename + " on printer " + printer, pk);
+        }else
+            return "Permission not allowed";
     }
     public String queue(String token,String printer) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, InvalidKeySpecException, IOException {
         token = Encryption.decrypt(token, Keys.getPrivate());
         printer = Encryption.decrypt(printer, Keys.getPrivate());
-        TokenGenerator tokenGenerator = new TokenGenerator();
-        String user = tokenGenerator.theUserBasedOnToken(token);
-        File publicKeyFile = new File(user+".key");
-        byte[] publicKeyBytes = Files.readAllBytes(publicKeyFile.toPath());
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
-        PublicKey pk = keyFactory.generatePublic(publicKeySpec);
-        System.out.println("<" + user + "> Queue: parameters " + printer);
-        return Encryption.encrypt("Queue for print " + printer + ": 0", pk);
+        user = tg.theUserBasedOnToken(token);
+
+        if (service.isOperationAllowed(user, "queue")) {
+            TokenGenerator tokenGenerator = new TokenGenerator();
+            String user = tokenGenerator.theUserBasedOnToken(token);
+            File publicKeyFile = new File(user+".key");
+            byte[] publicKeyBytes = Files.readAllBytes(publicKeyFile.toPath());
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+            PublicKey pk = keyFactory.generatePublic(publicKeySpec);
+            System.out.println("<" + user + "> Queue: parameters " + printer);
+            return Encryption.encrypt("Queue for print " + printer + ": 0", pk);
+        } else
+            return "Permission not allowed";        
     }
     public void topQueue(String token,String printer, int job) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         token = Encryption.decrypt(token, Keys.getPrivate());
         printer = Encryption.decrypt(printer, Keys.getPrivate());
-        TokenGenerator tokenGenerator = new TokenGenerator();
-        String user = tokenGenerator.theUserBasedOnToken(token);
-        System.out.println("<" + user + "> topQueue: parameters " + printer + ", " + job);
+        user = tg.theUserBasedOnToken(token);
+        if (service.isOperationAllowed(user, "topQueue")) {
+            TokenGenerator tokenGenerator = new TokenGenerator();
+            String user = tokenGenerator.theUserBasedOnToken(token);
+            System.out.println("<" + user + "> topQueue: parameters " + printer + ", " + job);
+        }      
     }   
 
     public void start(String token) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         token = Encryption.decrypt(token, Keys.getPrivate());
-        TokenGenerator tokenGenerator = new TokenGenerator();
-        String user = tokenGenerator.theUserBasedOnToken(token);
-        System.out.println("<" + user + "> Start");
+        user = tg.theUserBasedOnToken(token);
+
+        if (service.isOperationAllowed(user, "start")) {
+            TokenGenerator tokenGenerator = new TokenGenerator();
+            String user = tokenGenerator.theUserBasedOnToken(token);
+            System.out.println("<" + user + "> Start");
+        }
     }
 
     public void stop(String token) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         token = Encryption.decrypt(token, Keys.getPrivate());
-        TokenGenerator tokenGenerator = new TokenGenerator();
-        String user = tokenGenerator.theUserBasedOnToken(token);
-        System.out.println("<" + user + "> Stop");
+        user = tg.theUserBasedOnToken(token);
+
+        if (service.isOperationAllowed(user, "stop")) {
+            TokenGenerator tokenGenerator = new TokenGenerator();
+            String user = tokenGenerator.theUserBasedOnToken(token);
+            System.out.println("<" + user + "> Stop");
+        }
     }
 
     public void restart(String token) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         token = Encryption.decrypt(token, Keys.getPrivate());
-        TokenGenerator tokenGenerator = new TokenGenerator();
-        String user = tokenGenerator.theUserBasedOnToken(token);
-        System.out.println("<" + user + "> Restart");
+        user = tg.theUserBasedOnToken(token);
+
+        if (service.isOperationAllowed(user, "restart")) {
+            TokenGenerator tokenGenerator = new TokenGenerator();
+            String user = tokenGenerator.theUserBasedOnToken(token);
+            System.out.println("<" + user + "> Restart");
+        }
     }
 
     public String status(String token,String printer) throws InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, IOException {
         token = Encryption.decrypt(token, Keys.getPrivate());
         printer = Encryption.decrypt(printer, Keys.getPrivate());
-        TokenGenerator tokenGenerator = new TokenGenerator();
-        String user = tokenGenerator.theUserBasedOnToken(token);
-        File publicKeyFile = new File(user+".key");
-        byte[] publicKeyBytes = Files.readAllBytes(publicKeyFile.toPath());
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
-        PublicKey pk = keyFactory.generatePublic(publicKeySpec);
-        System.out.println("<" + user + "> Status: parameters " + printer);
-        return Encryption.encrypt("Status for printer " + printer,pk);
+        user = tg.theUserBasedOnToken(token);
+
+        if (service.isOperationAllowed(user, "status")) {
+            TokenGenerator tokenGenerator = new TokenGenerator();
+            String user = tokenGenerator.theUserBasedOnToken(token);
+            File publicKeyFile = new File(user+".key");
+            byte[] publicKeyBytes = Files.readAllBytes(publicKeyFile.toPath());
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+            PublicKey pk = keyFactory.generatePublic(publicKeySpec);
+            System.out.println("<" + user + "> Status: parameters " + printer);
+            return Encryption.encrypt("Status for printer " + printer,pk);
+        } else
+            return "Permission not allowed";
     }
 
     public String readConfig(String token,String parameter) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, IOException, InvalidKeySpecException {
         parameter = Encryption.decrypt(parameter, Keys.getPrivate());
         token = Encryption.decrypt(token, Keys.getPrivate());
-        TokenGenerator tokenGenerator = new TokenGenerator();
-        String user = tokenGenerator.theUserBasedOnToken(token);
-        File publicKeyFile = new File(user+".key");
-        byte[] publicKeyBytes = Files.readAllBytes(publicKeyFile.toPath());
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
-        PublicKey pk = keyFactory.generatePublic(publicKeySpec);
-        System.out.println("<" + user + "> ReadConfig: parameters " + parameter);
-        return Encryption.encrypt("Config for parameter " + parameter, pk);
+        user = tg.theUserBasedOnToken(token);
+
+        if (service.isOperationAllowed(user, "readConfig")) {
+            TokenGenerator tokenGenerator = new TokenGenerator();
+            String user = tokenGenerator.theUserBasedOnToken(token);
+            File publicKeyFile = new File(user+".key");
+            byte[] publicKeyBytes = Files.readAllBytes(publicKeyFile.toPath());
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+            PublicKey pk = keyFactory.generatePublic(publicKeySpec);
+            System.out.println("<" + user + "> ReadConfig: parameters " + parameter);
+            return Encryption.encrypt("Config for parameter " + parameter, pk);
+        } else
+            return "Permission not allowed";        
     }
 
     public void setConfig(String token,String parameter, String value) throws IOException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         token = Encryption.decrypt(token, Keys.getPrivate());
-        TokenGenerator tokenGenerator = new TokenGenerator();
-        String user = tokenGenerator.theUserBasedOnToken(token);
-        System.out.println("<" + user + "> SetConfig: parameters " + Encryption.decrypt(parameter, Keys.getPrivate()) + ", " + Encryption.decrypt(value, Keys.getPrivate()));
+        user = tg.theUserBasedOnToken(token);
+
+        if (service.isOperationAllowed(user, "setConfig")) {
+            TokenGenerator tokenGenerator = new TokenGenerator();
+            String user = tokenGenerator.theUserBasedOnToken(token);
+            System.out.println("<" + user + "> SetConfig: parameters " + Encryption.decrypt(parameter, Keys.getPrivate()) + ", " + Encryption.decrypt(value, Keys.getPrivate()));
+        }
     }
     
     public String authenticateUser(String username, String password, PublicKey pk) throws RemoteException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
@@ -160,4 +199,5 @@ public class PrintService extends UnicastRemoteObject implements IPrintService{
         }
         return null;
     }
+
 }
