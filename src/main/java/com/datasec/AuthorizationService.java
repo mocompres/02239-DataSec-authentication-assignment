@@ -13,7 +13,7 @@ public class AuthorizationService {
     public AuthorizationService(){
         BufferedReader reader = null;
         try{
-        reader = new BufferedReader(new FileReader("src/main/java/com/datasec/system.txt"));
+        reader = new BufferedReader(new FileReader("src/main/java/com/datasec/policy.txt"));
 
             String line;
             // Reading lines from the file until the end is reached
@@ -23,8 +23,8 @@ public class AuthorizationService {
 
                 if (!userList.contains(policy[0])) {
                     userList.add(policy[0]);
-                    String[] theUsersoperations = line.split(", ");
-
+                    String[] theUsersoperations = policy[1].split(", ");
+                    policyList.add(new ArrayList());
                     for (int j = 0; j < theUsersoperations.length; j++) {
                         policyList.get(userList.indexOf(policy[0])).add(theUsersoperations[j]);
                     }
@@ -33,6 +33,12 @@ public class AuthorizationService {
             reader.close();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+    public void outputLists(){
+        for (int i = 0; i < userList.size(); i++) {
+            System.out.println("The user: " + userList.get(i));
+            System.out.println("The the permissions: " + policyList.get(i));
         }
     }
 
@@ -47,4 +53,5 @@ public class AuthorizationService {
         }else
             return false;
     }
+
 }

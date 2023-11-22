@@ -37,7 +37,7 @@ public class Client {
 			login();
 		//HelloService servce = (HelloService) Naming.lookup("rmi://localhost:5099/hello");
         //System.out.println("---"+ servce.echo("hey server"));
-			service.print(Encryption.encrypt(token, serverPublicKey),Encryption.encrypt("TestFilename", serverPublicKey), Encryption.encrypt("TestPrinter", serverPublicKey));
+			/*service.print(Encryption.encrypt(token, serverPublicKey),Encryption.encrypt("TestFilename", serverPublicKey), Encryption.encrypt("TestPrinter", serverPublicKey));
 			service.queue(Encryption.encrypt(token, serverPublicKey),Encryption.encrypt("TestPrinter", serverPublicKey));
 			service.topQueue(Encryption.encrypt(token, serverPublicKey),Encryption.encrypt("TestPrinter", serverPublicKey), 1);
 			service.start(Encryption.encrypt(token, serverPublicKey));
@@ -46,7 +46,7 @@ public class Client {
 			service.status(Encryption.encrypt(token, serverPublicKey),Encryption.encrypt("Testprinter", serverPublicKey));
 			service.readConfig(Encryption.encrypt(token, serverPublicKey),Encryption.encrypt("TestParameter", serverPublicKey));
 			service.setConfig(Encryption.encrypt(token, serverPublicKey), Encryption.encrypt("TestParameter", serverPublicKey), Encryption.encrypt("TestValue", serverPublicKey));
-
+			*/
 		} catch (Exception e) {
 			System.err.println(e);
 			System.out.println(e);
@@ -70,9 +70,9 @@ public class Client {
 
 		auth = service.authenticateUser(Encryption.encrypt(userName, serverPublicKey), Encryption.encrypt(password, serverPublicKey), keyPair.getPublic());
 		auth = Encryption.decrypt(auth, keyPair.getPrivate());
-		System.out.println(auth);
 
 		token = auth;
+		System.out.println("The token: " + token);
 
 		user = tg.theUserBasedOnToken(token);
 		System.out.println("The username:" + user);
@@ -83,8 +83,67 @@ public class Client {
 
 		userInfo = tg.infoBasedOnToken(token);
 		System.out.println("The userObject:" + userInfo);
+		
+
+		userExecution(user);
+		
 
 		input.close();
 		return true;
 	}
+
+	public static void executeOperations(String operation){		
+		try{
+            service = (IPrintService) Naming.lookup("rmi://localhost:5099/print");
+            String tokenEncrypted = Encryption.encrypt(token, serverPublicKey);
+
+            switch (operation) {
+                case "print":
+                    service.print(tokenEncrypted ,Encryption.encrypt("TestFilename", serverPublicKey), Encryption.encrypt("TestPrinter", serverPublicKey));
+                    break;
+                case "queue":
+		        	service.queue(tokenEncrypted,Encryption.encrypt("TestPrinter", serverPublicKey));
+                    break;
+                case "topQueue":
+			        service.topQueue(tokenEncrypted,Encryption.encrypt("TestPrinter", serverPublicKey), 1);
+                    break;
+                case "start":
+			        service.start(tokenEncrypted);
+                    break;
+                case "stop":
+			        service.stop(tokenEncrypted);
+                    break;
+                case "restart":
+			        service.restart(tokenEncrypted);
+                    break;
+                case "status":
+			        service.status(tokenEncrypted,Encryption.encrypt("Testprinter", serverPublicKey));
+                    break;
+                case "readConfig":
+			        service.readConfig(tokenEncrypted,Encryption.encrypt("TestParameter", serverPublicKey));
+                    break;
+                case "setConfig":
+			        service.setConfig(tokenEncrypted, Encryption.encrypt("TestParameter", serverPublicKey), Encryption.encrypt("TestValue", serverPublicKey));
+                    break;
+                default:
+                    break;
+            }
+        } catch (Exception e) {
+			System.err.println(e);
+			System.out.println(e);
+		}
+	}
+
+	public static void userExecution(String userName){
+		AuthorizationService authorizationService = new AuthorizationService();
+
+        System.out.println("Type the operation you want to run: ");
+        Scanner input = new Scanner(System.in);
+        String operation = input.nextLine();
+
+        if (authorizationService.isOperationAllowed(userName, operation)) {
+            executeOperations(operation);
+        }else
+            System.out.println("You dont have permission");
+    }
 }
