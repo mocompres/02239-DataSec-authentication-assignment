@@ -18,7 +18,6 @@ import java.util.Base64;
 import java.util.Scanner;
 
 public class PrintService extends UnicastRemoteObject implements IPrintService{
-
     static KeyPair Keys;
     private AuthorizationService authorizationService = new AuthorizationService();
     public PrintService() throws RemoteException, NoSuchAlgorithmException {
@@ -28,7 +27,6 @@ public class PrintService extends UnicastRemoteObject implements IPrintService{
         KeyPair pair = generator.generateKeyPair();
         Keys = pair;
     }
-
     public PublicKey getPublicKey() throws RemoteException {
         return Keys.getPublic();
     }
@@ -77,8 +75,7 @@ public class PrintService extends UnicastRemoteObject implements IPrintService{
             return Encryption.encrypt("Access denied", pk);
         System.out.println("<" + user + "> topQueue: parameters " + printer + ", " + job);
         return Encryption.encrypt("Job set to top of queue", pk);
-    }   
-
+    }
     public String start(String token) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, InvalidKeySpecException, IOException {
         token = Encryption.decrypt(token, Keys.getPrivate());
         TokenGenerator tokenGenerator = new TokenGenerator();
@@ -93,7 +90,6 @@ public class PrintService extends UnicastRemoteObject implements IPrintService{
         System.out.println("<" + user + "> Start");
         return Encryption.encrypt("Startet", pk);
     }
-
     public String stop(String token) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, IOException, InvalidKeySpecException {
         token = Encryption.decrypt(token, Keys.getPrivate());
         TokenGenerator tokenGenerator = new TokenGenerator();
@@ -108,7 +104,6 @@ public class PrintService extends UnicastRemoteObject implements IPrintService{
         System.out.println("<" + user + "> Stop");
         return Encryption.encrypt("Stopped", pk);
     }
-
     public String restart(String token) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, IOException, InvalidKeySpecException {
         token = Encryption.decrypt(token, Keys.getPrivate());
         TokenGenerator tokenGenerator = new TokenGenerator();
@@ -123,7 +118,6 @@ public class PrintService extends UnicastRemoteObject implements IPrintService{
         System.out.println("<" + user + "> Restart");
         return Encryption.encrypt("Restarted", pk);
     }
-
     public String status(String token,String printer) throws InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, IOException {
         token = Encryption.decrypt(token, Keys.getPrivate());
         printer = Encryption.decrypt(printer, Keys.getPrivate());
@@ -139,7 +133,6 @@ public class PrintService extends UnicastRemoteObject implements IPrintService{
         System.out.println("<" + user + "> Status: parameters " + printer);
         return Encryption.encrypt("Status for printer " + printer,pk);
     }
-
     public String readConfig(String token,String parameter) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, IOException, InvalidKeySpecException {
         parameter = Encryption.decrypt(parameter, Keys.getPrivate());
         token = Encryption.decrypt(token, Keys.getPrivate());
@@ -155,7 +148,6 @@ public class PrintService extends UnicastRemoteObject implements IPrintService{
         System.out.println("<" + user + "> ReadConfig: parameters " + parameter);
         return Encryption.encrypt("Config for parameter " + parameter, pk);
     }
-
     public String setConfig(String token,String parameter, String value) throws IOException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, InvalidKeySpecException {
         token = Encryption.decrypt(token, Keys.getPrivate());
         TokenGenerator tokenGenerator = new TokenGenerator();
@@ -170,7 +162,6 @@ public class PrintService extends UnicastRemoteObject implements IPrintService{
         System.out.println("<" + user + "> SetConfig: parameters " + Encryption.decrypt(parameter, Keys.getPrivate()) + ", " + Encryption.decrypt(value, Keys.getPrivate()));
         return Encryption.encrypt("Config set", pk);
     }
-
     private String hash(String pass, String salt) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("SHA-512");
         md.update(salt.getBytes(StandardCharsets.UTF_8));
@@ -181,7 +172,6 @@ public class PrintService extends UnicastRemoteObject implements IPrintService{
         }
         return sb.toString();
     }
-
     public String authenticateUser(String username, String password, PublicKey pk) throws RemoteException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         username = Encryption.decrypt(username, Keys.getPrivate());
         password = Encryption.decrypt(password, Keys.getPrivate());

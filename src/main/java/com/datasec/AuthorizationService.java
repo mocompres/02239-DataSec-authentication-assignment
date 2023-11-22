@@ -71,15 +71,10 @@ public class AuthorizationService {
     }
 
     public boolean isOperationAllowed(String username, String operation){
-        int i;
-        boolean allowed = false;
         for (Role r: roleList) {
-            if(r.userList.contains(username) && (r.policyList.contains(operation) || r.policyList.contains("*"))){
-                allowed = true;
-                break;
-            }
+            if(r.userList.contains(username) && (r.policyList.contains(operation) || r.policyList.contains("*")))
+                return true;
         }
-        return allowed;
+        return false;
     }
-
 }
