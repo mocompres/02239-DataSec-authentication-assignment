@@ -4,6 +4,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
@@ -119,7 +120,18 @@ public class PrintService extends UnicastRemoteObject implements IPrintService{
         String user = tokenGenerator.theUserBasedOnToken(token);
         System.out.println("<" + user + "> SetConfig: parameters " + Encryption.decrypt(parameter, Keys.getPrivate()) + ", " + Encryption.decrypt(value, Keys.getPrivate()));
     }
-    
+
+    private String hash(String pass, String salt) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("SHA-512");
+        md.update(salt.getBytes(StandardCharsets.UTF_8));
+        byte[] bytes = md.digest(pass.getBytes(StandardCharsets.UTF_8));
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < bytes.length; i++) {
+            sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+        }
+        return sb.toString();
+    }
+
     public String authenticateUser(String username, String password, PublicKey pk) throws RemoteException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         username = Encryption.decrypt(username, Keys.getPrivate());
         password = Encryption.decrypt(password, Keys.getPrivate());
@@ -137,7 +149,7 @@ public class PrintService extends UnicastRemoteObject implements IPrintService{
                 //System.out.println(Arrays.toString(loginStrings));
                 
                 if(loginStrings[0].equals(username)){
-                    if(loginStrings[1].equals(password)){
+                    if(loginStrings[1].equals(hash(password, loginStrings[2]))){
                         System.out.println("Authenticated user: " + username);
                         TokenGenerator tokenGenerator = new TokenGenerator();
                         token = tokenGenerator.generateToken(username);
@@ -148,7 +160,7 @@ public class PrintService extends UnicastRemoteObject implements IPrintService{
                     }
                     else{
                         System.out.println("The user" + username + " not authenticated");
-                        return "Password was incorrect";
+                        return Encryption.encrypt("Password was incorrect", pk);
                     }
                 }
                 if(line == null && token == null)
