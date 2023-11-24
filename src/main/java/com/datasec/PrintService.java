@@ -41,7 +41,7 @@ public class PrintService extends UnicastRemoteObject implements IPrintService {
         user = tg.theUserBasedOnToken(token);
 
         if (!service.isOperationAllowed(user, "print")) {
-            System.out.println("<" + user + "> Print: Permission denied");
+            System.out.println("<" + user + "> Print: Permission Denied");
             return "Permission not allowed";
         }
 
@@ -61,7 +61,7 @@ public class PrintService extends UnicastRemoteObject implements IPrintService {
         user = tg.theUserBasedOnToken(token);
 
         if (!service.isOperationAllowed(user, "queue")) {
-            System.out.println("<" + user + "> Queue: Permission denied");
+            System.out.println("<" + user + "> Queue: Permission Denied");
             return "Permission not allowed";
         }
 
@@ -95,7 +95,7 @@ public class PrintService extends UnicastRemoteObject implements IPrintService {
         user = tg.theUserBasedOnToken(token);
 
         if (!service.isOperationAllowed(user, "start")) {
-            System.out.println("<" + user + "> Start: Permission denied");
+            System.out.println("<" + user + "> Start: Permission Denied");
             return;
         }
 

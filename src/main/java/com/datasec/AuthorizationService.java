@@ -45,7 +45,7 @@ public class AuthorizationService {
         int i;
         if (userList.contains(username)) {
             i = userList.indexOf(username);
-            if (policyList.get(i).contains(operation))
+            if (policyList.get(i).contains(operation) || policyList.get(i).contains("*"))
                 return true;
             else
                 return false;
