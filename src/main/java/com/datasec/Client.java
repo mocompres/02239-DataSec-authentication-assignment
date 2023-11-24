@@ -41,7 +41,6 @@ public class Client {
 				service.readConfig(Encryption.encrypt(token, serverPublicKey),Encryption.encrypt("TestParameter", serverPublicKey));
 				service.setConfig(Encryption.encrypt(token, serverPublicKey), Encryption.encrypt("TestParameter", serverPublicKey), Encryption.encrypt("TestValue", serverPublicKey));
 			}
-			
 		} catch (Exception e) {
 			System.err.println(e);
 			System.out.println(e);
@@ -51,20 +50,19 @@ public class Client {
     public static boolean login() throws RemoteException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		Scanner input = new Scanner(System.in);
 
-		String auth;
-		serverPublicKey =  service.getPublicKey();
 		System.out.println("Enter your username");
 		String userName = input.nextLine();  
 		
 		System.out.println("Enter your password");
 		String password = input.nextLine();
 
+		serverPublicKey =  service.getPublicKey();
 		String usernameEncrypted = Encryption.encrypt(userName, serverPublicKey);
 		String passwordEncrypted = Encryption.encrypt(password, serverPublicKey);
 
-		auth = service.authenticateUser(usernameEncrypted, passwordEncrypted, keyPair.getPublic());auth = Encryption.decrypt(auth, keyPair.getPrivate());
+		String auth = service.authenticateUser(usernameEncrypted, passwordEncrypted, keyPair.getPublic());
+		token = Encryption.decrypt(auth, keyPair.getPrivate());
 
-		token = auth;
 		//token = Encryption.decrypt(auth, keyPair.getPrivate());
 
 
